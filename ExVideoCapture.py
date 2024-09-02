@@ -2,6 +2,7 @@ import cv2, sys
 
 fileName = 'data/vtest.avi'
 
+# VideoCapture 클래스 객체 생성 + 생성자가 호출(파일 열기)
 cap = cv2.VideoCapture(fileName)
 
 frameSize = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -9,6 +10,7 @@ print(frameSize)
 
 while True:
     retval, frame = cap.read()
+    # retval가 양수가 아니면 while문 빠져나가기(종료)
     if not retval:
         break
     cv2.imshow('frame', frame)
