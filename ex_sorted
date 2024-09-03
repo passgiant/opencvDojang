@@ -1,0 +1,9 @@
+# numbers = ['20240903_11', '20240903_12', '20240903_13']
+
+import os
+
+folder_name = os.listdir('test')
+#print(folder_name)
+
+sorted_numbers = sorted(folder_name)
+print("정렬된 숫자:", sorted_numbers)
