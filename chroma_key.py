@@ -2,6 +2,18 @@ import sys
 import numpy as np
 import cv2
 
+hmin = 50
+hmax = 70
+smin = 150
+smax = 255
+
+# 트랙바 콜백 함수 생성
+def on_trackbar(pos):
+    global hmin, hmax, smin, smax
+    hmin = cv2.getTrackbarPos('H_min', 'frame')
+    hmax = cv2.getTrackbarPos('H_max', 'frame')
+    smin = cv2.getTrackbarPos('S_min', 'frame')
+
 fileName1 = 'data2/woman.mp4'
 fileName2 = 'data2/raining.mp4'
 
@@ -34,6 +46,23 @@ delay = int(1000/fps1)
 # 합성 여부 설정 플래그
 do_composite = False
 
+# 창을 먼저 생성, 트랙바 추가
+cv2.namedWindow('frame')
+
+cv2.createTrackbar('H_min', 'frame', 40, 60, on_trackbar)
+cv2.createTrackbar('H_max', 'frame', 60, 80, on_trackbar)
+cv2.createTrackbar('S_min', 'frame', 150, 255, on_trackbar)
+
+cv2.setTrackbarPos('H_min', 'frame', hmin)
+cv2.setTrackbarPos('H_max', 'frame', hmax)
+cv2.setTrackbarPos('S_min', 'frame', smin)
+
+on_trackbar(0)
+
+ret1, frame1 = cap1.read()
+hsv = cv2.cvtColor(frame1, cv2.COLOR_BGR2HSV)
+frameCount1=0
+
 while True:
     ret1, frame1 = cap1.read()
     if not ret1:
@@ -46,8 +75,11 @@ while True:
     
         # hsv 색공간에서 영역을 검출해서 합성
         hsv = cv2.cvtColor(frame1, cv2.COLOR_BGR2HSV)
-        # h: 50~70, s: 150~255, v: 0~255
-        mask = cv2.inRange(hsv,(50,150,0),(70,255,255))
+        # h: 50~70, s: 150~255, v: 0~255 
+        mask = cv2.inRange(hsv,(hmin,150,0),(hmax,255,255))
+        frameCount1 += 1
+        if frameCount1 % 30 == 0:
+            print(hmin, hmax, smin, smax)
         cv2.copyTo(frame2, mask, frame1)
     
     # 결과 확인
