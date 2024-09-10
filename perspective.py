@@ -68,7 +68,7 @@ if img is None:
     sys.exit('Image load failed')
 
 h, w, _ = img.shape
-print(w, h)
+#print(w, h)
 
 spare = 30
 #다각형의 좌표를 그릴 때는 시계방향으로
