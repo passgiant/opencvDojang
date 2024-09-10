@@ -22,28 +22,15 @@ def getImageList():
     
     return fileNames
 
-def getTextList():
-    #현재 작업 디렉토리 확인
-    basePath = os.getcwd()
-    dataPath = os.path.join(basePath,'images')
-    fileNames = glob(os.path.join(dataPath,'*.txt'))
-    
-    return fileNames
-
 #두 개 좌표를 이용해서 직사각형 그리기
-def drawROI(cpy, boxList, currentBox=None, flag=False):
+def drawROI(cpy, boxList, currentBox=None):
     #박스를 그릴 레이어를 생성: cpy
     cpy = cpy.copy()
     line_c = (128, 128, 255)
     lineWidth = 2
     print(boxList)
-    print(len(boxList))
-    cv2.rectangle(cpy, tuple(boxList[0]), tuple(boxList[1]), color=(255,0,255), thickness=lineWidth)
-    if len(boxList) == 1 and flag:
-        cv2.rectangle(cpy, tuple(boxList[0]), tuple(boxList[1]), color=(255,0,255), thickness=lineWidth)
-    elif len(boxList) > 1:
-        for corners in boxList:
-            cv2.rectangle(cpy, tuple(corners[0]), tuple(corners[1]), color=line_c, thickness=lineWidth)
+    for corners in boxList:
+        cv2.rectangle(cpy, tuple(corners[0]), tuple(corners[1]), color=line_c, thickness=lineWidth)
     if currentBox:
         cv2.rectangle(cpy, tuple(currentBox[0]), tuple(currentBox[1]), color=(0, 255, 0), thickness=lineWidth)
     disp = cv2.addWeighted(img, 0.3, cpy, 0.7, 0)
@@ -57,7 +44,7 @@ def onMouse(event, x, y, flags, param):
     elif event == cv2.EVENT_LBUTTONUP:
         ptList = [startPt, (x,y)]
         boxList.append(ptList)
-        txtWrData = str(ptList)
+        txtWrData = str(boxList)
         cpy = drawROI(cpy, boxList)
         startPt = None
         cv2.imshow('label',cpy)
@@ -74,7 +61,6 @@ cpy = []
 txtWrData = None
 
 fileNames = getImageList()
-txtName = getTextList()
 
 n = 0
 img = cv2.imread(fileNames[n])
@@ -88,12 +74,11 @@ while True:
     if key == 27: # ESC
         break
     elif key == ord('s'):
-        filename, ext = os.path.splitext(fileNames[0])
+        filename, ext = os.path.splitext(fileNames[n])
         txtFilename = filename + '.txt'
         f = open(txtFilename, 'w')
         f.write(txtWrData)
         f.close()
-        print(f'before write txt : {txtWrData}')
     elif key == ord('c'): # c키를 누르면 모든 박스 초기화
         boxList = []
         cpy = img.copy()
@@ -118,13 +103,14 @@ while True:
     elif key == ord('m'):
         filename, ext = os.path.splitext(fileNames[n])
         txtFilename = filename + '.txt'
-        f = open(txtFilename, 'r')
-        pt_str = f.read().strip()
-        pt = list(ast.literal_eval(pt_str))
-        flag = True
-        showImg = drawROI(img, pt, None, flag)
-        cv2.imshow('label', showImg)
-        flag = False
-        f.close()
-    
+        try:
+            f = open(txtFilename, 'r')
+            pt_str = f.read().strip()
+            pt = ast.literal_eval(pt_str)
+            showImg = drawROI(img, pt)
+            cv2.imshow('label', showImg)
+            f.close()
+        except FileNotFoundError:
+            print('파일이 없습니다.')
+        
 cv2.destroyAllWindows()
